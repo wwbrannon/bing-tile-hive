@@ -4,67 +4,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
-import com.facebook.presto.operator.scalar.AbstractTestFunctions;
-import com.facebook.presto.spi.type.ArrayType;
-import com.facebook.presto.spi.type.Type;
+import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.exception.BingTileException;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static org.testng.Assert.assertEquals;
-
-import static com.facebook.presto.metadata.FunctionExtractor.extractFunctions;
-import static com.facebook.presto.operator.scalar.ApplyFunction.APPLY_FUNCTION;
-import static com.facebook.presto.plugin.geospatial.BingTile.fromCoordinates;
-import static com.facebook.presto.plugin.geospatial.BingTileType.BING_TILE;
-import static com.facebook.presto.spi.type.BigintType.BIGINT;
-import static com.facebook.presto.spi.type.BooleanType.BOOLEAN;
-import static com.facebook.presto.spi.type.IntegerType.INTEGER;
-import static com.facebook.presto.spi.type.TinyintType.TINYINT;
-import static com.facebook.presto.spi.type.VarcharType.VARCHAR;
-
-public class TestBingTileFunctions
+public class TestBT
         extends AbstractTestFunctions
 {
-    @BeforeClass
-    protected void registerFunctions()
-    {
-        GeoPlugin plugin = new GeoPlugin();
-        for (Type type : plugin.getTypes()) {
-            functionAssertions.getTypeRegistry().addType(type);
-        }
-        functionAssertions.getMetadata().addFunctions(extractFunctions(plugin.getFunctions()));
-        functionAssertions.getMetadata().addFunctions(ImmutableList.of(APPLY_FUNCTION));
-    }
-
-    @Test
-    public void testSerialization()
-            throws Exception
-    {
-        ObjectMapper objectMapper = new ObjectMapper();
-        BingTile tile = fromCoordinates(1, 2, 3);
-        String json = objectMapper.writeValueAsString(tile);
-        assertEquals("{\"x\":1,\"y\":2,\"zoom\":3}", json);
-        assertEquals(tile, objectMapper.readerFor(BingTile.class).readValue(json));
-    }
-
-    @Test
-    public void testArrayOfBingTiles()
-            throws Exception
-    {
-        assertFunction("array [bing_tile(1, 2, 10), bing_tile(3, 4, 11)]",
-                new ArrayType(BING_TILE),
-                ImmutableList.of(fromCoordinates(1, 2, 10), fromCoordinates(3, 4, 11)));
-    }
-
     @Test
     public void testBingTile()
     {
+        Assert.assertEquals(
         assertFunction("bing_tile_quadkey(bing_tile('213'))", VARCHAR, "213");
         assertFunction("bing_tile_quadkey(bing_tile('123030123010121'))", VARCHAR, "123030123010121");
 
@@ -86,12 +42,33 @@ public class TestBingTileFunctions
     }
 
     @Test
+    public void testSerialization()
+            throws Exception
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        BingTile tile = BingTile.fromCoordinates(1, 2, 3);
+        String json = objectMapper.writeValueAsString(tile);
+        Assert.assertEquals("{\"x\":1,\"y\":2,\"zoom\":3}", json);
+        Assert.assertEquals(tile, objectMapper.readerFor(BingTile.class).readValue(json));
+    }
+
+    @Test
+    public void testArrayOfBingTiles()
+            throws Exception
+    {
+        assertFunction("array [bing_tile(1, 2, 10), bing_tile(3, 4, 11)]",
+                new ArrayType(BING_TILE),
+                ImmutableList.of(BingTile.fromCoordinates(1, 2, 10),
+                                 BingTile.fromCoordinates(3, 4, 11)));
+    }
+
+    @Test
     public void testPointToBingTile()
     {
-        assertFunction("bing_tile_at(30.12, 60, 15)", BING_TILE, fromCoordinates(21845, 13506, 15));
-        assertFunction("bing_tile_at(0, -0.002, 1)", BING_TILE, fromCoordinates(0, 1, 1));
-        assertFunction("bing_tile_at(1e0/512, 0, 1)", BING_TILE, fromCoordinates(1, 0, 1));
-        assertFunction("bing_tile_at(1e0/512, 0, 9)", BING_TILE, fromCoordinates(256, 255, 9));
+        assertFunction("bing_tile_at(30.12, 60, 15)", BING_TILE, BingTile.fromCoordinates(21845, 13506, 15));
+        assertFunction("bing_tile_at(0, -0.002, 1)", BING_TILE, BingTile.fromCoordinates(0, 1, 1));
+        assertFunction("bing_tile_at(1e0/512, 0, 1)", BING_TILE, BingTile.fromCoordinates(1, 0, 1));
+        assertFunction("bing_tile_at(1e0/512, 0, 9)", BING_TILE, BingTile.fromCoordinates(256, 255, 9));
 
         // Invalid calls
         // Longitude out of range
@@ -310,9 +287,9 @@ public class TestBingTileFunctions
         assertFunction("transform(geometry_to_bing_tiles(ST_Envelope(ST_GeometryFromText('LINESTRING (59.765625 29.84064389983442, 60.2 30.14512718337612)')), 10), x -> bing_tile_quadkey(x))", new ArrayType(VARCHAR), ImmutableList.of("1230301230", "1230301231"));
 
         // Empty geometries
-        assertGeometryToBingTiles("POINT EMPTY", 10, emptyList());
-        assertGeometryToBingTiles("POLYGON EMPTY", 10, emptyList());
-        assertGeometryToBingTiles("GEOMETRYCOLLECTION EMPTY", 10, emptyList());
+        assertGeometryToBingTiles("POINT EMPTY", 10, Collections.emptyList());
+        assertGeometryToBingTiles("POLYGON EMPTY", 10, Collections.emptyList());
+        assertGeometryToBingTiles("GEOMETRYCOLLECTION EMPTY", 10, Collections.emptyList());
 
         // Invalid input
         // Longitude out of range
@@ -342,7 +319,7 @@ public class TestBingTileFunctions
 
     private void assertGeometryToBingTiles(String wkt, int zoomLevel, List<String> expectedQuadKeys)
     {
-        assertFunction(format("transform(geometry_to_bing_tiles(ST_GeometryFromText('%s'), %s), x -> bing_tile_quadkey(x))", wkt, zoomLevel), new ArrayType(VARCHAR), expectedQuadKeys);
+        assertFunction(String.format("transform(geometry_to_bing_tiles(ST_GeometryFromText('%s'), %s), x -> bing_tile_quadkey(x))", wkt, zoomLevel), new ArrayType(VARCHAR), expectedQuadKeys);
     }
 
     @Test
@@ -370,7 +347,6 @@ public class TestBingTileFunctions
     @Test
     public void testDistinctFrom()
     {
-        assertFunction("null IS DISTINCT FROM null", BOOLEAN, false);
         assertFunction("bing_tile(3, 5, 3) IS DISTINCT FROM null", BOOLEAN, true);
         assertFunction("null IS DISTINCT FROM bing_tile(3, 5, 3)", BOOLEAN, true);
 
