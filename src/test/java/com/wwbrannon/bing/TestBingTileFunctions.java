@@ -1,17 +1,22 @@
-/*package com.wwbrannon.bing;
-
-import com.facebook.presto.operator.scalar.AbstractTestFunctions;
-import com.facebook.presto.spi.type.ArrayType;
-import com.facebook.presto.spi.type.Type;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+package com.wwbrannon.bing;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.facebook.presto.operator.scalar.AbstractTestFunctions;
+import com.facebook.presto.spi.type.ArrayType;
+import com.facebook.presto.spi.type.Type;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static org.testng.Assert.assertEquals;
 
 import static com.facebook.presto.metadata.FunctionExtractor.extractFunctions;
 import static com.facebook.presto.operator.scalar.ApplyFunction.APPLY_FUNCTION;
@@ -22,9 +27,6 @@ import static com.facebook.presto.spi.type.BooleanType.BOOLEAN;
 import static com.facebook.presto.spi.type.IntegerType.INTEGER;
 import static com.facebook.presto.spi.type.TinyintType.TINYINT;
 import static com.facebook.presto.spi.type.VarcharType.VARCHAR;
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static org.testng.Assert.assertEquals;
 
 public class TestBingTileFunctions
         extends AbstractTestFunctions
@@ -380,4 +382,4 @@ public class TestBingTileFunctions
         assertFunction("bing_tile('213') IS DISTINCT FROM bing_tile('2131')", BOOLEAN, true);
     }
 }
-*/
+

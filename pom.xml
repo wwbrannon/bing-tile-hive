@@ -17,13 +17,6 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
       <version>2.8.3</version>
@@ -34,7 +27,7 @@
       <artifactId>hive-exec</artifactId>
       <version>2.3.2</version>
     </dependency>
-    
+
     <dependency>
       <groupId>com.esri.geometry</groupId>
       <artifactId>esri-geometry-api</artifactId>
@@ -46,5 +39,37 @@
       <artifactId>spatial-sdk-hive</artifactId>
       <version>1.0.2</version>
     </dependency>
+    
+    <!-- testing -->
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.14.3</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.9.6</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>25.1-jre</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>com.facebook.presto</groupId>
+        <artifactId>presto-tests</artifactId>
+        <version>0.204</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
+
+
