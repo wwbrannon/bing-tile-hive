@@ -2,8 +2,6 @@ package com.wwbrannon.bing;
 
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DoubleWritable;
@@ -23,8 +21,6 @@ import com.wwbrannon.bing.exception.BingTileException;
 )
 
 public class BT_TilesCoveringGeometry extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_TilesCoveringGeometry.class.getName());
-
     public ArrayList<Text> evaluate(BytesWritable geomref, IntWritable zoomLevel) throws BingTileException
     {
         if (geomref == null || geomref.getLength() == 0 || zoomLevel == null)

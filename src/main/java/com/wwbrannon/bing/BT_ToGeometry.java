@@ -1,7 +1,5 @@
 package com.wwbrannon.bing;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.io.BytesWritable;
@@ -22,9 +20,6 @@ import com.wwbrannon.bing.exception.BingTileException;
 )
 
 public class BT_ToGeometry extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_ToGeometry.class.getName());
-
-
 	public BytesWritable evaluate(Text btref) throws BingTileException {
 		return evaluate(btref, 0);
 	}
