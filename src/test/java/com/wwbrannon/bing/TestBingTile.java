@@ -3,7 +3,7 @@ package com.wwbrannon.bing;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
-import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
 public class TestBingTile
@@ -16,6 +16,7 @@ public class TestBingTile
 
         assertFunction("bing_tile_quadkey(bing_tile(3, 5, 3))", VARCHAR, "213");
         assertFunction("bing_tile_quadkey(bing_tile(21845, 13506, 15))", VARCHAR, "123030123010121");
+    }
 
         // Invalid calls: corrupt quadkeys
         assertInvalidFunction("bing_tile('')", "QuadKey must not be empty string");

@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
-import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
 public class TestGeometryToBingTiles
