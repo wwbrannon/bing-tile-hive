@@ -19,7 +19,7 @@ import com.wwbrannon.bing.exception.BingTileException;
     extended = ""
 )
 
-public class BT_ToGeometry extends BT_Base {
+public class BT_AsGeometry extends BT_Base {
 	public BytesWritable evaluate(Text btref) throws BingTileException {
 		return evaluate(btref, 0);
 	}

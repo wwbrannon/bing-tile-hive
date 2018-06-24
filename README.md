@@ -3,7 +3,7 @@ Bing tile support for Hive
 
 ### SQL statements for load
 ```
-drop function if exists BT_Base; create temporary function 'BT_Base' as 'com.wwbrannon.bing.BT_Base';
+drop function if exists BT_AsGeometry; create temporary function 'BT_AsGeometry' as 'com.wwbrannon.bing.BT_AsGeometry';
 drop function if exists BT_FromLatLon; create temporary function 'BT_FromLatLon' as 'com.wwbrannon.bing.BT_FromLatLon';
 drop function if exists BT_GetX; create temporary function 'BT_GetX' as 'com.wwbrannon.bing.BT_GetX';
 drop function if exists BT_TilesAround; create temporary function 'BT_TilesAround' as 'com.wwbrannon.bing.BT_TilesAround';
@@ -14,6 +14,5 @@ drop function if exists BT_TilesCoveringGeometry; create temporary function 'BT_
 drop function if exists BT_FromCoordinates; create temporary function 'BT_FromCoordinates' as 'com.wwbrannon.bing.BT_FromCoordinates';
 drop function if exists BT_GetQuadKey; create temporary function 'BT_GetQuadKey' as 'com.wwbrannon.bing.BT_GetQuadKey';
 drop function if exists BT_GetZoomLevel; create temporary function 'BT_GetZoomLevel' as 'com.wwbrannon.bing.BT_GetZoomLevel';
-drop function if exists BT_ToGeometry; create temporary function 'BT_ToGeometry' as 'com.wwbrannon.bing.BT_ToGeometry';
 ```
 
