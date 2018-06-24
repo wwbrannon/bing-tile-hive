@@ -10,9 +10,9 @@ import com.wwbrannon.bing.BingTile;
 import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
-    name = "",
-    value = "",
-    extended = ""
+    name = "BT_GetX",
+    value = "_FUNC_(BT_GetX) - return the x coordinate of a given Bing tile\n",
+    extended = "Example:\n"
 )
 
 public class BT_GetX extends BT_Base {

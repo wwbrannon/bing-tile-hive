@@ -10,9 +10,9 @@ import com.wwbrannon.bing.BingTile;
 import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
-    name = "",
-    value = "",
-    extended = ""
+    name = "BT_FromCoordinates",
+    value = "_FUNC_(BT_FromCoordinates) - return the Bing tile at given (x,y) coordinates at a given zoom level\n",
+    extended = "Example:\n"
 )
 
 public class BT_FromCoordinates extends BT_Base {

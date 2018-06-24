@@ -12,9 +12,9 @@ import com.wwbrannon.bing.BingTile;
 import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
-    name = "",
-    value = "",
-    extended = ""
+    name = "BT_TilesAround",
+    value = "_FUNC_(BT_TilesAround) - return an array of Bing tiles surrounding a given lat/long at a given zoom level\n",
+    extended = "Example:\n"
 )
 
 public class BT_TilesAround extends BT_Base {

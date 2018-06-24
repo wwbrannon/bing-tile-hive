@@ -10,9 +10,9 @@ import com.wwbrannon.bing.BingTile;
 import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
-    name = "",
-    value = "",
-    extended = ""
+    name = "BT_GetZoomLevel",
+    value = "_FUNC_(BT_GetZoomLevel) - return the zoom level of a given Bing tile\n",
+    extended = "Example:\n"
 )
 
 public class BT_GetZoomLevel extends BT_Base {
