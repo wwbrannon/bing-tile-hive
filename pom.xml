@@ -4,11 +4,10 @@
   <groupId>com.wwbrannon.bing</groupId>
   <artifactId>bing-tile-hive</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   
   <name>bing-tile-hive</name>
   <url>https://github.com/wwbrannon/bing-tile-hive</url>
-
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,13 +60,6 @@
       <artifactId>guava</artifactId>
       <version>25.1-jre</version>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-        <groupId>com.facebook.presto</groupId>
-        <artifactId>presto-tests</artifactId>
-        <version>0.204</version>
-        <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
