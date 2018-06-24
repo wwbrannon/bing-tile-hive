@@ -11,8 +11,15 @@ import java.lang.String.format;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.ogc.OGCGeometry;
+import com.esri.hadoop.hive.GeometryUtils;
 
 import com.wwbrannon.bing.exception.BingException;
+
+import com.wwbrannon.bing.BingUtils.contains;
+import com.wwbrannon.bing.BingUtils.disjoint;
+import com.wwbrannon.bing.BingUtils.getEnvelope;
+import com.wwbrannon.bing.BingUtils.getPointCount;
+import com.wwbrannon.bing.BingUtils.isPointOrRectangle;
 
 public final class BingTile
 {
@@ -23,6 +30,7 @@ public final class BingTile
     private static final double MIN_LATITUDE = -85.05112878;
     private static final double MIN_LONGITUDE = -180;
     private static final double MAX_LONGITUDE = 180;
+    private static final int OPTIMIZED_TILING_MIN_ZOOM_LEVEL = 10;
 
     private static final String LATITUDE_OUT_OF_RANGE = "Latitude must be between " + MIN_LATITUDE + " and " + MAX_LATITUDE;
     private static final String LONGITUDE_OUT_OF_RANGE = "Longitude must be between " + MIN_LONGITUDE + " and " + MAX_LONGITUDE;
@@ -139,6 +147,122 @@ public final class BingTile
      * Misc utility methods
      */
 
+    private static void checkGeometryToBingTilesLimits(OGCGeometry geom, boolean pointOrRectangle, long tileCount)
+    {
+        if (pointOrRectangle) {
+            checkCondition(tileCount <= 1_000_000, "The number of input tiles is too large (more than 1M) to compute a set of covering Bing tiles.");
+        }
+        else {
+            checkCondition((int) tileCount == tileCount, "The zoom level is too high to compute a set of covering Bing tiles.");
+            
+            long complexity = 0;
+            try {
+                complexity = multiplyExact(tileCount, getPointCount(geom));
+            }
+            catch (ArithmeticException e) {
+                checkCondition(false, "The zoom level is too high or the geometry is too complex to compute a set of covering Bing tiles. " +
+                        "Please use a lower zoom level or convert the geometry to its bounding box using the ST_Envelope function.");
+            }
+            checkCondition(complexity <= 25_000_000, "The zoom level is too high or the geometry is too complex to compute a set of covering Bing tiles. " +
+                    "Please use a lower zoom level or convert the geometry to its bounding box using the ST_Envelope function.");
+        }
+    }
+
+    private static BingTile[] getTilesInBetween(BingTile leftUpperTile, BingTile rightLowerTile, int zoomLevel)
+    {
+        checkCondition(leftUpperTile.getZoomLevel() == rightLowerTile.getZoomLevel(), "Mismatched zoom levels");
+        checkCondition(leftUpperTile.getZoomLevel() > zoomLevel, "Tile zoom level too low");
+
+        int divisor = 1 << (leftUpperTile.getZoomLevel() - zoomLevel);
+        
+        int minX = (int) Math.floor(leftUpperTile.getX() / divisor);
+        int maxX = (int) Math.floor(rightLowerTile.getX() / divisor);
+        int minY = (int) Math.floor(leftUpperTile.getY() / divisor);
+        int maxY = (int) Math.floor(rightLowerTile.getY() / divisor);
+
+        BingTile[] tiles = new BingTile[(maxX - minX + 1) * (maxY - minY + 1)];
+        
+        int index = 0;
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                tiles[index] = BingTile.fromCoordinates(x, y, OPTIMIZED_TILING_MIN_ZOOM_LEVEL);
+                index++;
+            }
+        }
+
+        return tiles;
+    }
+
+    private static BingTile getTileCoveringLowerRightCorner(Envelope envelope, int zoomLevel)
+    {
+        BingTile tile = fromLatLon(envelope.getYMin(), envelope.getXMax(), zoomLevel);
+
+        // If the tile covering the lower right corner of the envelope overlaps the envelope only
+        // at the border then return a tile shifted to the left and/or top
+        int deltaX = 0;
+        int deltaY = 0;
+        
+        Point upperLeftCorner = tileXYToLatitudeLongitude(tile.getX(), tile.getY(), tile.getZoomLevel());
+        if (upperLeftCorner.getX() == envelope.getXMax())
+            deltaX = -1;
+        if (upperLeftCorner.getY() == envelope.getYMin())
+            deltaY = -1;
+
+        if (deltaX == 0 && deltaY == 0)
+            return tile;
+        else
+            return BingTile.fromCoordinates(tile.getX() + deltaX, tile.getY() + deltaY, tile.getZoomLevel());
+    }
+
+    private static void appendIntersectingSubtiles(
+            OGCGeometry geom,
+            int zoomLevel,
+            BingTile tile,
+            ArrayList<BingTile> al)
+    {
+        int tileZoomLevel = tile.getZoomLevel();
+        checkCondition(tileZoomLevel <= zoomLevel, "Tile zoom level too high");
+
+        Envelope tileEnvelope = tile.toEnvelope();
+        if (tileZoomLevel == zoomLevel) {
+            if (!disjoint(tileEnvelope, geom))
+                al.add(tile);
+            
+            return;
+        }
+
+        if (contains(geom, tileEnvelope)) {
+            int subTileCount = 1 << (zoomLevel - tileZoomLevel);
+            
+            int minX = subTileCount * tile.getX();
+            int minY = subTileCount * tile.getY();
+            
+            for (int x = minX; x < minX + subTileCount; x++)
+                for (int y = minY; y < minY + subTileCount; y++)
+                    al.add(BingTile.fromCoordinates(x, y, zoomLevel));
+            
+            return;
+        }
+
+        if (disjoint(tileEnvelope, geom)) {
+            return;
+        }
+
+        int minX = 2 * tile.getX();
+        int minY = 2 * tile.getY();
+        int nextZoomLevel = tileZoomLevel + 1;
+        
+        checkCondition(nextZoomLevel <= MAX_ZOOM_LEVEL, "Next zoom level too high");
+        for (int x = minX; x < minX + 2; x++)
+            for (int y = minY; y < minY + 2; y++)
+                appendIntersectingSubtiles(
+                        geom,
+                        zoomLevel,
+                        BingTile.fromCoordinates(x, y, nextZoomLevel),
+                        al);
+    
+    }
+
     private static double clip(double n, double minValue, double maxValue)
     {
         return Math.min(Math.max(n, minValue), maxValue);
@@ -248,13 +372,14 @@ public final class BingTile
 
     public static BingTile fromQuadKey(String quadKey) throws BingException
     {
-        int zoomLevel = quadKey.length();
-        
+        checkQuadKey(quadKey);
         checkCondition(zoomLevel > 0, ZOOM_LEVEL_TOO_SMALL);
         checkCondition(zoomLevel <= MAX_ZOOM_LEVEL, ZOOM_LEVEL_TOO_LARGE);
         
         int tileX = 0;
         int tileY = 0;
+        int zoomLevel = quadKey.length();
+        
         for (int i = zoomLevel; i > 0; i--) {
             int mask = 1 << (i - 1);
             switch (quadKey.charAt(zoomLevel - i)) {
@@ -277,6 +402,10 @@ public final class BingTile
 
         return new BingTile(tileX, tileY, zoomLevel);
     }
+
+    /*
+     * Construct ArrayList<BingTile> of arrays matching input
+     */
 
     public static ArrayList<BingTile> tilesAround(double lat, double lon, int zoomLevel)
     {
@@ -303,6 +432,66 @@ public final class BingTile
         }
 
         return ret;
+    }
+
+    public static ArrayList<BingTile> tilesCovering(OGCGeometry geom, int zoomLevel)
+    {
+        checkZoomLevel(zoomLevel, ZOOM_LEVEL_OUT_OF_RANGE);
+
+        ArrayList<BingTile> ret = new ArrayList<BingTile>();
+
+        if (geom.isEmpty()) {
+            return ret;
+        }
+
+        Envelope envelope = getEnvelope(geom);
+        
+        checkLatitude(envelope.getYMin(), LATITUDE_SPAN_OUT_OF_RANGE);
+        checkLatitude(envelope.getYMax(), LATITUDE_SPAN_OUT_OF_RANGE);
+        checkLongitude(envelope.getXMin(), LONGITUDE_SPAN_OUT_OF_RANGE);
+        checkLongitude(envelope.getXMax(), LONGITUDE_SPAN_OUT_OF_RANGE);
+
+        boolean pointOrRectangle = isPointOrRectangle(geom, envelope);
+
+        BingTile leftUpperTile = fromLatLon(envelope.getYMax(), envelope.getXMin(), zoomLevel);
+        BingTile rightLowerTile = getTileCoveringLowerRightCorner(envelope, zoomLevel);
+
+        // XY coordinates start at (0,0) in the left upper corner and increase left to right and top to bottom
+        long tileCount = (long) (rightLowerTile.getX() - leftUpperTile.getX() + 1) * (rightLowerTile.getY() - leftUpperTile.getY() + 1);
+
+        checkGeometryToBingTilesLimits(geom, pointOrRectangle, tileCount);
+
+        if (pointOrRectangle || zoomLevel <= OPTIMIZED_TILING_MIN_ZOOM_LEVEL) {
+            // Collect tiles covering the bounding box and check each tile for intersection with the geometry.
+            // Skip intersection check if geometry is a point or rectangle. In these cases, by definition,
+            // all tiles covering the bounding box intersect the geometry.
+            for (int x = leftUpperTile.getX(); x <= rightLowerTile.getX(); x++)
+            {
+                for (int y = leftUpperTile.getY(); y <= rightLowerTile.getY(); y++)
+                {
+                    BingTile tile = BingTile.fromCoordinates(x, y, zoomLevel);
+                    
+                    if (pointOrRectangle || !disjoint(tile.toEnvelope(), geom))
+                        ret.add(tile);
+                }
+            }
+        }
+        else {
+            // Intersection checks above are expensive. The logic below attempts to reduce the number
+            // of these checks. The idea is to identify large tiles which are fully covered by the
+            // geometry. For each such tile, we can cheaply compute all the containing tiles at
+            // the right zoom level and append them to results in bulk. This way we perform a single
+            // containment check instead of 2 to the power of level delta intersection checks, where
+            // level delta is the difference between the desired zoom level and level of the large
+            // tile covered by the geometry.
+            BingTile[] tiles = getTilesInBetween(leftUpperTile, rightLowerTile, OPTIMIZED_TILING_MIN_ZOOM_LEVEL);
+            for (BingTile tile : tiles) {
+                appendIntersectingSubtiles(geom, zoomLevel, tile, blockBuilder);
+            }
+        }
+
+        return ret;
+    }
     }
 
     /*

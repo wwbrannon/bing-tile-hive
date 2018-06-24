@@ -11,19 +11,20 @@ import org.apache.hadoop.io.Text;
 import com.wwbrannon.bing.BingTile;
 
 @Description(
-	name = "",
-	value = "",
-	extended = ""
+    name = "",
+    value = "",
+    extended = ""
 )
 
 public class BT_BingTileZoomLevel extends BT_Base {
     static final Log LOG = LogFactory.getLog(BT_BingTileZoomLevel.class.getName());
 
-    public int evaluate(TextWritable btref)
+    public IntWritable evaluate(Text btref)
     {
         if(btref == null) return null;
 
-        return BingTile.fromQuadKey(btref).getZoomLevel();
+        int z = BingTile.fromQuadKey(btref.toString()).getZoomLevel();
+        return IntWritable(z);
     }
 }
 

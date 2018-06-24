@@ -12,19 +12,18 @@ import com.esri.hadoop.hive.GeometryUtils;
 import com.wwbrannon.bing.BingTile;
 
 @Description(
-	name = "",
-	value = "",
-	extended = ""
+    name = "",
+    value = "",
+    extended = ""
 )
 
 public class BT_BingTileToGeometry extends BT_Base {
-	static final Log LOG = LogFactory.getLog(BT_BingTileToGeometry.class.getName());
+    static final Log LOG = LogFactory.getLog(BT_BingTileToGeometry.class.getName());
 
-	public BytesWritable evaluate(BytesWritable btref) throws UDFArgumentException {
-		BingTile bt = BingTile.fromQuadKey(btref);
-		
+    public BytesWritable evaluate(Text btref) throws UDFArgumentException {
+        BingTile bt = BingTile.fromQuadKey(btref.toString());
+        
         return GeometryUtils.geometryToEsriShapeBytesWritable(bt.toEnvelope());
-	}
-
+    }
 }
 

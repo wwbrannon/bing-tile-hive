@@ -6,27 +6,28 @@ import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.BingTile;
 
 @Description(
-	name = "",
-	value = "",
-	extended = ""
+    name = "",
+    value = "",
+    extended = ""
 )
 
 public class BT_Equals extends BT_Base {
     static final Log LOG = LogFactory.getLog(BT_BingTileEquals.class.getName());
 
-    public boolean evaluate(TextWritable left, TextWritable right)
+    public BooleanWritable evaluate(Text left, Text right)
     {
         if(left == null || right == null) return null;
 
-        BingTile btl = BingTile.fromQuadKey(left);
-        BingTile btr = BingTile.fromQuadKey(right);
+        BingTile btl = BingTile.fromQuadKey(left.toString());
+        BingTile btr = BingTile.fromQuadKey(right.toString());
 
-        return btl.equals(btr);
+        return BooleanWritable(btl.equals(btr));
     }
 }
 

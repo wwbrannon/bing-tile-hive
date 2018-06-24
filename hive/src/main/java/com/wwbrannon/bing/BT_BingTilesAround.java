@@ -1,7 +1,6 @@
 package com.wwbrannon.bing;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,24 +13,24 @@ import org.apache.hadoop.io.Text;
 import com.wwbrannon.bing.BingTile;
 
 @Description(
-	name = "",
-	value = "",
-	extended = ""
+    name = "",
+    value = "",
+    extended = ""
 )
 
 public class BT_BingTilesAround extends BT_Base {
     static final Log LOG = LogFactory.getLog(BT_BingTilesAround.class.getName());
 
-    public ArrayList<BytesWritable> evaluate(DoubleWritable lat, DoubleWritable lon,
-                                             IntWritable zoomlevel)
+    public ArrayList<Text> evaluate(DoubleWritable lat, DoubleWritable lon,
+                                    IntWritable zoomlevel)
     {
         if(lat == null || lon == null || zoomLevel == null) return null;
         
-        ArrayList<BingTile> tmp = BingTile.tilesAround(lat, lon, zoomLevel);
-        ArrayList<BytesWritable> ret = new ArrayList<BytesWritable>();
+        ArrayList<Text> ret = new ArrayList<Text>();
+        ArrayList<BingTile> tmp = BingTile.tilesAround(lat.get(), lon.get(), zoomLevel.get());
 
-        for (BytesWritable b: tmp)
-            ret.add(b);
+        for (BingTile b: tmp)
+            ret.add(Text(b.toQuadKey()));
 
         return ret;
     }

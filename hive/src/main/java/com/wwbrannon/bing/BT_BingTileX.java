@@ -11,19 +11,20 @@ import org.apache.hadoop.io.Text;
 import com.wwbrannon.bing.BingTile;
 
 @Description(
-	name = "",
-	value = "",
-	extended = ""
+    name = "",
+    value = "",
+    extended = ""
 )
 
 public class BT_BingTileX extends BT_Base {
     static final Log LOG = LogFactory.getLog(BT_BingTileX.class.getName());
 
-    public int evaluate(TextWritable btref)
+    public IntWritable evaluate(Text btref)
     {
         if(btref == null) return null;
 
-        return BingTile.fromQuadKey(btref).getX();
+        int x = BingTile.fromQuadKey(btref.toString()).getX();
+        return IntWritable(x);
     }
 }
 
