@@ -14,9 +14,9 @@ import com.esri.core.geometry.ogc.OGCPolygon;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class BingUtils
+public final class BingTileUtils
 {
-    private BingUtils() {}
+    private BingTileUtils() {}
 
     /**
      * Copy of com.esri.core.geometry.Interop.translateFromAVNaN

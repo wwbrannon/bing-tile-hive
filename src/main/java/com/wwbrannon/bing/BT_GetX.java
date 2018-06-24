@@ -9,23 +9,23 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "",
     value = "",
-    extended = ":
+    extended = ""
 )
 
-public class BT_BingTileQuadKey extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_BingTileQuadKey.class.getName());
+public class BT_GetX extends BT_Base {
+    static final Log LOG = LogFactory.getLog(BT_GetX.class.getName());
 
-    public Text evaluate(Text btref)
+    public IntWritable evaluate(Text btref) throws BingTileException
     {
         if(btref == null) return null;
 
-        // create this object as a way of checking validity
-        BingTile bt = BingTile.fromQuadKey(btref.toString());
-        return Text(bt.toQuadKey());
+        int x = BingTile.fromQuadKey(btref.toString()).getX();
+        return new IntWritable(x);
     }
 }
 

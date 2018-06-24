@@ -6,12 +6,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 import com.esri.core.geometry.ogc.OGCGeometry;
 import com.esri.hadoop.hive.GeometryUtils;
 
 import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "",
@@ -19,10 +22,10 @@ import com.wwbrannon.bing.BingTile;
     extended = ""
 )
 
-public class BT_BingTilesCoveringGeometry extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_BingTilesCoveringGeometry.class.getName());
+public class BT_TilesCoveringGeometry extends BT_Base {
+    static final Log LOG = LogFactory.getLog(BT_TilesCoveringGeometry.class.getName());
 
-    public ArrayList<Text> evaluate(BytesWritable geomref, IntWritable zoomLevel)
+    public ArrayList<Text> evaluate(BytesWritable geomref, IntWritable zoomLevel) throws BingTileException
     {
         if (geomref == null || geomref.getLength() == 0 || zoomLevel == null)
             return null;
@@ -35,7 +38,7 @@ public class BT_BingTilesCoveringGeometry extends BT_Base {
         ArrayList<BingTile> tmp = BingTile.tilesCovering(geom, zoomLevel.get());
 
         for (BingTile b: tmp)
-            ret.add(Text(b.toQuadKey()));
+            ret.add(new Text(b.toQuadKey()));
 
         return ret;
     }

@@ -9,6 +9,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "",
@@ -16,15 +17,16 @@ import com.wwbrannon.bing.BingTile;
     extended = ""
 )
 
-public class BT_BingTileX extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_BingTileX.class.getName());
+public class BT_GetQuadKey extends BT_Base {
+    static final Log LOG = LogFactory.getLog(BT_GetQuadKey.class.getName());
 
-    public IntWritable evaluate(Text btref)
+    public Text evaluate(Text btref) throws BingTileException
     {
         if(btref == null) return null;
 
-        int x = BingTile.fromQuadKey(btref.toString()).getX();
-        return IntWritable(x);
+        // create this object as a way of checking validity
+        BingTile bt = BingTile.fromQuadKey(btref.toString());
+        return new Text(bt.toQuadKey());
     }
 }
 

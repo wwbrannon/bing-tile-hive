@@ -4,22 +4,16 @@ import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.lang.Math.multiplyExact;
-import java.lang.Math.toIntExact;
-import java.lang.String.format;
+import java.lang.Math;
+import java.lang.String;
 
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.ogc.OGCGeometry;
 import com.esri.hadoop.hive.GeometryUtils;
 
-import com.wwbrannon.bing.exception.BingException;
-
-import com.wwbrannon.bing.BingUtils.contains;
-import com.wwbrannon.bing.BingUtils.disjoint;
-import com.wwbrannon.bing.BingUtils.getEnvelope;
-import com.wwbrannon.bing.BingUtils.getPointCount;
-import com.wwbrannon.bing.BingUtils.isPointOrRectangle;
+import com.wwbrannon.bing.BingTileUtils;
+import com.wwbrannon.bing.exception.BingTileException;
 
 public final class BingTile
 {
@@ -48,14 +42,11 @@ public final class BingTile
      * Constructors
      */
 
-    private BingTile(int x, int y, int zoomLevel)
+    private BingTile(int x, int y, int zoomLevel) throws BingTileException
     {
-        if(x == null || y == null || zoomLevel == null)
-            throw new BingException("x, y, zoomLevel must be non-null");
-        
-        if(zoomLevel <= 0 || zoomLevel > MAX_ZOOM_LEVEL)
-            throw new BingException("zoomLevel must be > 0 and < " +
-                                    MAX_ZOOM_LEVEL.toString());
+        checkZoomLevel(zoomLevel);
+        checkCoordinate(x, zoomLevel);
+        checkCoordinate(y, zoomLevel);
 
         this.x = x;
         this.y = y;
@@ -66,38 +57,38 @@ public final class BingTile
      * Value-checking methods
      */
 
-    private static void checkCondition(boolean condition, String formatString, Object... args)
+    private static void checkCondition(boolean condition, String formatString, Object... args) throws BingTileException
     {
         if (!condition) {
-            throw new BingException(format(formatString, args));
+            throw new BingTileException(String.format(formatString, args));
         }
     }
 
-    private static void checkZoomLevel(long zoomLevel)
+    private static void checkZoomLevel(long zoomLevel) throws BingTileException
     {
         checkCondition(zoomLevel > 0, ZOOM_LEVEL_TOO_SMALL);
         checkCondition(zoomLevel <= MAX_ZOOM_LEVEL, ZOOM_LEVEL_TOO_LARGE);
     }
 
-    private static void checkCoordinate(long coordinate, long zoomLevel)
+    private static void checkCoordinate(long coordinate, long zoomLevel) throws BingTileException
     {
         checkCondition(coordinate >= 0 && coordinate < (1 << zoomLevel),
                        "XY coordinates for a Bing tile at zoom level %s must be within [0, %s) range",
                        zoomLevel, 1 << zoomLevel);
     }
 
-    private static void checkQuadKey(String quadkey)
+    private static void checkQuadKey(String quadkey) throws BingTileException
     {
         checkCondition(quadkey.length() > 0, QUAD_KEY_EMPTY);
         checkCondition(quadkey.length() <= MAX_ZOOM_LEVEL, QUAD_KEY_TOO_LONG);
     }
 
-    private static void checkLatitude(double latitude)
+    private static void checkLatitude(double latitude) throws BingTileException
     {
         checkCondition(latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE, LATITUDE_OUT_OF_RANGE);
     }
 
-    private static void checkLongitude(double longitude)
+    private static void checkLongitude(double longitude) throws BingTileException
     {
         checkCondition(longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE, LONGITUDE_OUT_OF_RANGE);
     }
@@ -147,7 +138,7 @@ public final class BingTile
      * Misc utility methods
      */
 
-    private static void checkGeometryToBingTilesLimits(OGCGeometry geom, boolean pointOrRectangle, long tileCount)
+    private static void checkGeometryToBingTilesLimits(OGCGeometry geom, boolean pointOrRectangle, long tileCount) throws BingTileException
     {
         if (pointOrRectangle) {
             checkCondition(tileCount <= 1_000_000, "The number of input tiles is too large (more than 1M) to compute a set of covering Bing tiles.");
@@ -157,7 +148,7 @@ public final class BingTile
             
             long complexity = 0;
             try {
-                complexity = multiplyExact(tileCount, getPointCount(geom));
+                complexity = Math.multiplyExact(tileCount, BingTileUtils.getPointCount(geom));
             }
             catch (ArithmeticException e) {
                 checkCondition(false, "The zoom level is too high or the geometry is too complex to compute a set of covering Bing tiles. " +
@@ -168,7 +159,7 @@ public final class BingTile
         }
     }
 
-    private static BingTile[] getTilesInBetween(BingTile leftUpperTile, BingTile rightLowerTile, int zoomLevel)
+    private static BingTile[] getTilesInBetween(BingTile leftUpperTile, BingTile rightLowerTile, int zoomLevel) throws BingTileException
     {
         checkCondition(leftUpperTile.getZoomLevel() == rightLowerTile.getZoomLevel(), "Mismatched zoom levels");
         checkCondition(leftUpperTile.getZoomLevel() > zoomLevel, "Tile zoom level too low");
@@ -193,7 +184,7 @@ public final class BingTile
         return tiles;
     }
 
-    private static BingTile getTileCoveringLowerRightCorner(Envelope envelope, int zoomLevel)
+    private static BingTile getTileCoveringLowerRightCorner(Envelope envelope, int zoomLevel) throws BingTileException
     {
         BingTile tile = fromLatLon(envelope.getYMin(), envelope.getXMax(), zoomLevel);
 
@@ -218,20 +209,20 @@ public final class BingTile
             OGCGeometry geom,
             int zoomLevel,
             BingTile tile,
-            ArrayList<BingTile> al)
+            ArrayList<BingTile> al) throws BingTileException
     {
         int tileZoomLevel = tile.getZoomLevel();
         checkCondition(tileZoomLevel <= zoomLevel, "Tile zoom level too high");
 
         Envelope tileEnvelope = tile.toEnvelope();
         if (tileZoomLevel == zoomLevel) {
-            if (!disjoint(tileEnvelope, geom))
+            if (!BingTileUtils.disjoint(tileEnvelope, geom))
                 al.add(tile);
             
             return;
         }
 
-        if (contains(geom, tileEnvelope)) {
+        if (BingTileUtils.contains(geom, tileEnvelope)) {
             int subTileCount = 1 << (zoomLevel - tileZoomLevel);
             
             int minX = subTileCount * tile.getX();
@@ -244,7 +235,7 @@ public final class BingTile
             return;
         }
 
-        if (disjoint(tileEnvelope, geom)) {
+        if (BingTileUtils.disjoint(tileEnvelope, geom)) {
             return;
         }
 
@@ -301,8 +292,8 @@ public final class BingTile
     public String toString()
     {
         String fmt = "%s{x=%s, y=%s, zoomLevel=%s}";
-        return format(fmt, this.getClass().getSimpleName(),
-                      x, y, zoomLevel);
+        return String.format(fmt, this.getClass().getSimpleName(),
+                             x, y, zoomLevel);
     }
 
     /*
@@ -346,7 +337,7 @@ public final class BingTile
      * alternative constructors as static methods
      */
 
-    public static BingTile decode(long tile)
+    public static BingTile decode(long tile) throws BingTileException
     {
         int tileX = (int) (tile >> 28);
         int tileY = (int) ((tile % (1 << 28)) >> 5);
@@ -355,12 +346,12 @@ public final class BingTile
         return new BingTile(tileX, tileY, zoomLevel);
     }
     
-    public static BingTile fromCoordinates(int x, int y, int zoomLevel)
+    public static BingTile fromCoordinates(int x, int y, int zoomLevel) throws BingTileException
     {
         return new BingTile(x, y, zoomLevel);
     }
 
-    public static BingTile fromLatLon(double lat, double lon, int zoomLevel)
+    public static BingTile fromLatLon(double lat, double lon, int zoomLevel) throws BingTileException
     {
         long mapSize = mapSize(zoomLevel);
         
@@ -370,15 +361,15 @@ public final class BingTile
         return BingTile.fromCoordinates(tileX, tileY, zoomLevel);
     }
 
-    public static BingTile fromQuadKey(String quadKey) throws BingException
+    public static BingTile fromQuadKey(String quadKey) throws BingTileException
     {
         checkQuadKey(quadKey);
-        checkCondition(zoomLevel > 0, ZOOM_LEVEL_TOO_SMALL);
-        checkCondition(zoomLevel <= MAX_ZOOM_LEVEL, ZOOM_LEVEL_TOO_LARGE);
+        
+        int zoomLevel = quadKey.length();
+        checkZoomLevel(zoomLevel);
         
         int tileX = 0;
         int tileY = 0;
-        int zoomLevel = quadKey.length();
         
         for (int i = zoomLevel; i > 0; i--) {
             int mask = 1 << (i - 1);
@@ -396,7 +387,7 @@ public final class BingTile
                     tileY |= mask;
                     break;
                 default:
-                    throw new BingException("Invalid QuadKey digit sequence: " + quadKey);
+                    throw new BingTileException("Invalid QuadKey digit sequence: " + quadKey);
             }
         }
 
@@ -407,19 +398,19 @@ public final class BingTile
      * Construct ArrayList<BingTile> of arrays matching input
      */
 
-    public static ArrayList<BingTile> tilesAround(double lat, double lon, int zoomLevel)
+    public static ArrayList<BingTile> tilesAround(double lat, double lon, int zoomLevel) throws BingTileException
     {
-        checkLatitude(latitude, LATITUDE_OUT_OF_RANGE);
-        checkLongitude(longitude, LONGITUDE_OUT_OF_RANGE);
-        checkZoomLevel(zoomLevel, ZOOM_LEVEL_OUT_OF_RANGE);
+        checkLatitude(lat);
+        checkLongitude(lon);
+        checkZoomLevel(zoomLevel);
 
         ArrayList<BingTile> ret = new ArrayList<BingTile>();
 
-        long mapSize = mapSize(toIntExact(zoomLevel));
+        long mapSize = mapSize(Math.toIntExact(zoomLevel));
         long maxTileIndex = (mapSize / TILE_PIXELS) - 1;
 
-        int tileX = longitudeToTileX(longitude, mapSize);
-        int tileY = longitudeToTileY(latitude, mapSize);
+        int tileX = longitudeToTileX(lon, mapSize);
+        int tileY = longitudeToTileY(lat, mapSize);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -427,16 +418,16 @@ public final class BingTile
                 int y = tileY + j;
                 
                 if (x >= 0 && x <= maxTileIndex && y >= 0 && y <= maxTileIndex)
-                    ret.add(BingTile.fromCoordinates(x, y, toIntExact(zoomLevel)));
+                    ret.add(BingTile.fromCoordinates(x, y, Math.toIntExact(zoomLevel)));
             }
         }
 
         return ret;
     }
 
-    public static ArrayList<BingTile> tilesCovering(OGCGeometry geom, int zoomLevel)
+    public static ArrayList<BingTile> tilesCovering(OGCGeometry geom, int zoomLevel) throws BingTileException
     {
-        checkZoomLevel(zoomLevel, ZOOM_LEVEL_OUT_OF_RANGE);
+        checkZoomLevel(zoomLevel);
 
         ArrayList<BingTile> ret = new ArrayList<BingTile>();
 
@@ -444,14 +435,14 @@ public final class BingTile
             return ret;
         }
 
-        Envelope envelope = getEnvelope(geom);
+        Envelope envelope = BingTileUtils.getEnvelope(geom);
         
-        checkLatitude(envelope.getYMin(), LATITUDE_SPAN_OUT_OF_RANGE);
-        checkLatitude(envelope.getYMax(), LATITUDE_SPAN_OUT_OF_RANGE);
-        checkLongitude(envelope.getXMin(), LONGITUDE_SPAN_OUT_OF_RANGE);
-        checkLongitude(envelope.getXMax(), LONGITUDE_SPAN_OUT_OF_RANGE);
+        checkLatitude(envelope.getYMin());
+        checkLatitude(envelope.getYMax());
+        checkLongitude(envelope.getXMin());
+        checkLongitude(envelope.getXMax());
 
-        boolean pointOrRectangle = isPointOrRectangle(geom, envelope);
+        boolean pointOrRectangle = BingTileUtils.isPointOrRectangle(geom, envelope);
 
         BingTile leftUpperTile = fromLatLon(envelope.getYMax(), envelope.getXMin(), zoomLevel);
         BingTile rightLowerTile = getTileCoveringLowerRightCorner(envelope, zoomLevel);
@@ -471,7 +462,7 @@ public final class BingTile
                 {
                     BingTile tile = BingTile.fromCoordinates(x, y, zoomLevel);
                     
-                    if (pointOrRectangle || !disjoint(tile.toEnvelope(), geom))
+                    if (pointOrRectangle || !BingTileUtils.disjoint(tile.toEnvelope(), geom))
                         ret.add(tile);
                 }
             }
@@ -486,12 +477,11 @@ public final class BingTile
             // tile covered by the geometry.
             BingTile[] tiles = getTilesInBetween(leftUpperTile, rightLowerTile, OPTIMIZED_TILING_MIN_ZOOM_LEVEL);
             for (BingTile tile : tiles) {
-                appendIntersectingSubtiles(geom, zoomLevel, tile, blockBuilder);
+                appendIntersectingSubtiles(geom, zoomLevel, tile, ret);
             }
         }
 
         return ret;
-    }
     }
 
     /*

@@ -11,6 +11,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.BingTile;
+import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "",
@@ -18,11 +19,11 @@ import com.wwbrannon.bing.BingTile;
     extended = ""
 )
 
-public class BT_BingTilesAround extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_BingTilesAround.class.getName());
+public class BT_TilesAround extends BT_Base {
+    static final Log LOG = LogFactory.getLog(BT_TilesAround.class.getName());
 
     public ArrayList<Text> evaluate(DoubleWritable lat, DoubleWritable lon,
-                                    IntWritable zoomlevel)
+                                    IntWritable zoomLevel) throws BingTileException
     {
         if(lat == null || lon == null || zoomLevel == null) return null;
         
@@ -30,7 +31,7 @@ public class BT_BingTilesAround extends BT_Base {
         ArrayList<BingTile> tmp = BingTile.tilesAround(lat.get(), lon.get(), zoomLevel.get());
 
         for (BingTile b: tmp)
-            ret.add(Text(b.toQuadKey()));
+            ret.add(new Text(b.toQuadKey()));
 
         return ret;
     }

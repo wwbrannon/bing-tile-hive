@@ -6,7 +6,6 @@ import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.BingTile;
@@ -18,17 +17,16 @@ import com.wwbrannon.bing.exception.BingTileException;
     extended = ""
 )
 
-public class BT_Equals extends BT_Base {
-    static final Log LOG = LogFactory.getLog(BT_Equals.class.getName());
+public class BT_FromCoordinates extends BT_Base {
+    static final Log LOG = LogFactory.getLog(BT_FromCoordinates.class.getName());
 
-    public BooleanWritable evaluate(Text left, Text right) throws BingTileException
+    public Text evaluate(IntWritable x, IntWritable y,
+                         IntWritable zoomLevel) throws BingTileException
     {
-        if(left == null || right == null) return null;
+        if(x == null || y == null || zoomLevel == null) return null;
 
-        BingTile btl = BingTile.fromQuadKey(left.toString());
-        BingTile btr = BingTile.fromQuadKey(right.toString());
-
-        return new BooleanWritable(btl.equals(btr));
+        BingTile bt = BingTile.fromCoordinates(x.get(), y.get(), zoomLevel.get());
+        return new Text(bt.toQuadKey());
     }
 }
 
