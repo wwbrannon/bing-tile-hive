@@ -15,7 +15,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_AsGeometry",
-    value = "_FUNC(BT_AsGeometry) - return ST_Geometry representation of Bing tile\n"
+    value = "_FUNC(BT_AsGeometry) - return ST_Geometry representation of Bing tile"
 )
 
 public class BT_AsGeometry extends BT_Base {

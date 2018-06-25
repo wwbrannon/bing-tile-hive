@@ -11,7 +11,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_FromLatLon",
-    value = "_FUNC_(BT_FromLatLon) - return the Bing tile containing a given lat/long at a given zoom level\n"
+    value = "_FUNC_(BT_FromLatLon) - return the Bing tile containing a given lat/long at a given zoom level"
 )
 
 public class BT_FromLatLon extends BT_Base {

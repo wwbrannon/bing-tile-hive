@@ -11,7 +11,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_GetQuadKey",
-    value = "_FUNC_(BT_GetQuadKey) - return the quadkey of a given Bing tile\n"
+    value = "_FUNC_(BT_GetQuadKey) - return the quadkey of a given Bing tile"
 )
 
 public class BT_GetQuadKey extends BT_Base {
