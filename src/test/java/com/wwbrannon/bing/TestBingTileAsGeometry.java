@@ -28,10 +28,8 @@ public class TestBingTileAsGeometry
         assertEquals((new ST_AsText()).evaluate((new BT_AsGeometry()).evaluate((new BT_FromQuadKey()).evaluate(new Text("123030123010121")))).toString(),
                      "POLYGON ((59.996337890625 30.11662158281937, 60.00732421875 30.11662158281937, 60.00732421875 30.12612436422458, 59.996337890625 30.12612436422458, 59.996337890625 30.11662158281937))");
         
-        // FIXME
-        // assertEquals((new ST_AsText()).evaluate((new ST_Centroid()).evaluate((new BT_AsGeometry()).evaluate((new BT_FromQuadKey()).evaluate(new Text("123030123010121"))))).toString(),
-        //              "POINT (60.0018310442288 30.121372968273892)");
-        // assertFunction("ST_AsText(ST_Centroid(bing_tile_polygon(bing_tile('123030123010121'))))", VARCHAR, "POINT (60.0018310442288 30.121372968273892)");
+        assertEquals((new ST_AsText()).evaluate((new ST_Centroid()).evaluate((new BT_AsGeometry()).evaluate((new BT_FromQuadKey()).evaluate(new Text("123030123010121"))))).toString(),
+                      "POINT (60.0018310546875 30.121372973521975)");
 
         // Check bottom right corner of a stack of tiles at different zoom levels
         BytesWritable bt;
