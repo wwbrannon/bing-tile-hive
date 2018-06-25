@@ -1,7 +1,6 @@
 [![Build Status](https://img.shields.io/travis/wwbrannon/bing-tile-hive.svg?style=flat)](https://travis-ci.org/wwbrannon/bing-tile-hive)
 
 # bing-tile-hive
-----------------
 
 This repository provides support for [Bing tiles](https://msdn.microsoft.com/en-us/library/bb259689.aspx) for Hive. Much of the functionality is a port of [Presto's implementation](https://github.com/prestodb/presto/tree/master/presto-geospatial/src/main/java/com/facebook/presto/plugin/geospatial), but there are differences described below.
 
@@ -25,3 +24,4 @@ add jar /path/to/jar/dir/bing-tile-hive-X.Y.jar;
 ```
 
 Finally, run the appropriate `CREATE FUNCTION` statements to add the classes in the jar as UDFs. A script to create temporary (i.e., session-specific) functions is in this repo under `/sql/install.sql`.
+
