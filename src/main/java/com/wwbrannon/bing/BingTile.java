@@ -7,9 +7,6 @@ import java.util.List;
 import java.lang.Math;
 import java.lang.String;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.ogc.OGCGeometry;
@@ -349,12 +346,7 @@ public final class BingTile
         return new BingTile(tileX, tileY, zoomLevel);
     }
     
-    @JsonCreator
-    public static BingTile fromCoordinates(
-        @JsonProperty("x") int x,
-        @JsonProperty("y") int y,
-        @JsonProperty("zoom") int zoomLevel
-    ) throws BingTileException
+    public static BingTile fromCoordinates( int x, int y, int zoomLevel) throws BingTileException
     {
         return new BingTile(x, y, zoomLevel);
     }
@@ -500,19 +492,16 @@ public final class BingTile
      * Accessor methods
      */
 
-    @JsonProperty
     public int getX()
     {
         return x;
     }
 
-    @JsonProperty
     public int getY()
     {
         return y;
     }
 
-    @JsonProperty("zoom")
     public int getZoomLevel()
     {
         return zoomLevel;
