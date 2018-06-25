@@ -1,22 +1,30 @@
 package com.wwbrannon.bing;
 
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
+import static org.testng.Assert.*;
+
 public class TestEqual
 {
     @Test
-    public void test()
+    public void test() throws BingTileException
     {
-        assertFunction("bing_tile(3, 5, 3) = bing_tile(3, 5, 3)", BOOLEAN, true);
-        assertFunction("bing_tile('213') = bing_tile(3, 5, 3)", BOOLEAN, true);
-        assertFunction("bing_tile('213') = bing_tile('213')", BOOLEAN, true);
+        assertTrue( (new BT_Equals()).evaluate(new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey()),
+                                               new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey())).get());
+        assertTrue( (new BT_Equals()).evaluate(new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey()),
+                                               new Text(BingTile.fromQuadKey("213").toQuadKey())).get());
+        assertTrue( (new BT_Equals()).evaluate(new Text(BingTile.fromQuadKey("213").toQuadKey()),
+                                               new Text(BingTile.fromQuadKey("213").toQuadKey())).get());
 
-        assertFunction("bing_tile(3, 5, 3) = bing_tile(3, 5, 4)", BOOLEAN, false);
-        assertFunction("bing_tile('213') = bing_tile('2131')", BOOLEAN, false);
+        assertFalse( (new BT_Equals()).evaluate(new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey()),
+                                                new Text(BingTile.fromCoordinates(3, 5, 4).toQuadKey())).get());
+        assertFalse( (new BT_Equals()).evaluate(new Text(BingTile.fromQuadKey("213").toQuadKey()),
+                                                new Text(BingTile.fromQuadKey("2131").toQuadKey())).get());
     }
 }
 
