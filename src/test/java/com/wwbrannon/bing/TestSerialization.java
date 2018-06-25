@@ -2,10 +2,11 @@ package com.wwbrannon.bing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
+
+import static org.testng.Assert.*;
 
 public class TestSerialization
 {
@@ -16,9 +17,8 @@ public class TestSerialization
         BingTile tile = BingTile.fromCoordinates(1, 2, 3);
         String json = objectMapper.writeValueAsString(tile);
 
-        // FIXME
-        // Assert.assertEquals(json, "{\"x\":1,\"y\":2,\"zoomLevel\":3}");
-        // Assert.assertEquals(objectMapper.readerFor(BingTile.class).readValue(json), tile);
+        assertEquals(json, "{\"x\":1,\"y\":2,\"zoom\":3}");
+        assertEquals(objectMapper.readerFor(BingTile.class).readValue(json), tile);
     }
 }
 
