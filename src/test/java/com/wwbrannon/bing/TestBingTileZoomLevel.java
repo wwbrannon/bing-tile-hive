@@ -1,18 +1,21 @@
 package com.wwbrannon.bing;
 
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
+import static org.testng.Assert.*;
+
 public class TestBingTileZoomLevel
 {
     @Test
-    public void test()
+    public void test() throws BingTileException
     {
-        assertFunction("bing_tile_zoom_level(bing_tile('213'))", TINYINT, (byte) 3);
-        assertFunction("bing_tile_zoom_level(bing_tile('123030123010121'))", TINYINT, (byte) 15);
+        assertEquals( (new BT_GetZoomLevel()).evaluate(new Text(BingTile.fromQuadKey("213").toQuadKey())).get(), 3);
+        assertEquals( (new BT_GetZoomLevel()).evaluate(new Text(BingTile.fromQuadKey("123030123010121").toQuadKey())).get(), 15);
     }
 }
 
