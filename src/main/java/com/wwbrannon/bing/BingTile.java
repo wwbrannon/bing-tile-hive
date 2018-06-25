@@ -361,6 +361,10 @@ public final class BingTile
 
     public static BingTile fromLatLon(double lat, double lon, int zoomLevel) throws BingTileException
     {
+        checkLatitude(lat);
+        checkLongitude(lon);
+        checkZoomLevel(zoomLevel);
+
         long mapSize = mapSize(zoomLevel);
         
         int tileX = longitudeToTileX(lon, mapSize);
