@@ -16,8 +16,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_TilesCoveringGeometry",
-    value = "_FUNC_(BT_TilesCoveringGeometry) - return the smallest set of Bing tiles that cover a given geometry at a given zoom level\n",
-    extended = "Example:\n"
+    value = "_FUNC_(BT_TilesCoveringGeometry) - return the smallest set of Bing tiles that cover a given geometry at a given zoom level\n"
 )
 
 public class BT_TilesCoveringGeometry extends BT_Base {

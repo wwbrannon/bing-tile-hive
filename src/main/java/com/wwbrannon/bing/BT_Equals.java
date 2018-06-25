@@ -12,8 +12,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_Equals",
-    value = "_FUNC_(BT_Equals) - test whether two Bing tiles are valid and equal\n",
-    extended = "Example:\n"
+    value = "_FUNC_(BT_Equals) - test whether two Bing tiles are valid and equal\n"
 )
 
 public class BT_Equals extends BT_Base {

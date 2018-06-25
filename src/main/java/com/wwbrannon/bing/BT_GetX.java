@@ -11,8 +11,7 @@ import com.wwbrannon.bing.exception.BingTileException;
 
 @Description(
     name = "BT_GetX",
-    value = "_FUNC_(BT_GetX) - return the x coordinate of a given Bing tile\n",
-    extended = "Example:\n"
+    value = "_FUNC_(BT_GetX) - return the x coordinate of a given Bing tile\n"
 )
 
 public class BT_GetX extends BT_Base {
