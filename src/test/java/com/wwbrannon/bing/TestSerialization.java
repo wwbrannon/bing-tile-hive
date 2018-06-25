@@ -15,8 +15,8 @@ public class TestSerialization
         ObjectMapper objectMapper = new ObjectMapper();
         BingTile tile = BingTile.fromCoordinates(1, 2, 3);
         String json = objectMapper.writeValueAsString(tile);
-        Assert.assertEquals("{\"x\":1,\"y\":2,\"zoom\":3}", json);
-        Assert.assertEquals(tile, objectMapper.readerFor(BingTile.class).readValue(json));
+        Assert.assertEquals(json, "{\"x\":1,\"y\":2,\"zoom\":3}");
+        Assert.assertEquals(objectMapper.readerFor(BingTile.class).readValue(json), tile);
     }
 }
 
