@@ -1,22 +1,24 @@
 package com.wwbrannon.bing;
 
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
+import static org.testng.Assert.*;
+
 public class TestBingTileCoordinates
 {
     @Test
-    public void test()
+    public void test() throws BingTileException
     {
-        assertFunction("bing_tile_coordinates(bing_tile('213')).x", INTEGER, 3);
-        assertFunction("bing_tile_coordinates(bing_tile('213')).y", INTEGER, 5);
-        assertFunction("bing_tile_coordinates(bing_tile('123030123010121')).x", INTEGER, 21845);
-        assertFunction("bing_tile_coordinates(bing_tile('123030123010121')).y", INTEGER, 13506);
-
-        assertCachedInstanceHasBoundedRetainedSize("bing_tile_coordinates(bing_tile('213'))");
+        assertEquals( (new BT_GetX()).evaluate(new Text("213")).get(), 3);
+        assertEquals( (new BT_GetY()).evaluate(new Text("213")).get(), 5);
+        
+        assertEquals( (new BT_GetX()).evaluate(new Text("123030123010121")).get(), 21845);
+        assertEquals( (new BT_GetY()).evaluate(new Text("123030123010121")).get(), 13506);
     }
 }
 
