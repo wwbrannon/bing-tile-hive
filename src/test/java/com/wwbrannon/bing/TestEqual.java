@@ -25,6 +25,10 @@ public class TestEqual
                                                 new Text(BingTile.fromCoordinates(3, 5, 4).toQuadKey())).get());
         assertFalse( (new BT_Equals()).evaluate(new Text(BingTile.fromQuadKey("213").toQuadKey()),
                                                 new Text(BingTile.fromQuadKey("2131").toQuadKey())).get());
+        
+        assertTrue( (new BT_Equals()).evaluate(new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey()), null) == null);
+        assertTrue( (new BT_Equals()).evaluate(null, new Text(BingTile.fromCoordinates(3, 5, 3).toQuadKey())) == null);
+        assertTrue( BingTile.fromCoordinates(3, 5, 3).toQuadKey() != null);
     }
 }
 
