@@ -1,56 +1,50 @@
 package com.wwbrannon.bing;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
+import java.util.Arrays;
+import java.util.ArrayList;
 
-import com.google.common.collect.ImmutableList;
+import org.testng.annotations.Test;
+
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;
 
+import static org.testng.Assert.*;
+
 public class TestBingTilesAroundEdge
 {
     @Test
-    public void test()
+    public void test() throws BingTileException
     {
-        // Different zoom Level
-        assertFunction(
-                "transform(bing_tiles_around(-85.05112878, 0, 1), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("0", "2", "1", "3"));
-        assertFunction(
-                "transform(bing_tiles_around(-85.05112878, 0, 3), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("231", "233", "320", "322", "321", "323"));
-        assertFunction(
-                "transform(bing_tiles_around(-85.05112878, 0, 15), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of(
-                        "233333333333331",
-                        "233333333333333",
-                        "322222222222220",
-                        "322222222222222",
-                        "322222222222221",
-                        "322222222222223"));
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(-85.05112878), new DoubleWritable(0), new IntWritable(1)),
+                     new ArrayList<Text>(Arrays.asList(new Text("0"), new Text("2"), new Text("1"), new Text("3"))));
+        
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(-85.05112878), new DoubleWritable(0), new IntWritable(3)),
+                     new ArrayList<Text>(Arrays.asList(new Text("231"), new Text("233"), new Text("320"),
+                                                       new Text("322"), new Text("321"), new Text("323"))));
+        
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(-85.05112878), new DoubleWritable(0), new IntWritable(15)),
+                     new ArrayList<Text>(Arrays.asList(new Text("233333333333331"), new Text("233333333333333"), new Text("322222222222220"),
+                                                       new Text("322222222222222"), new Text("322222222222221"), new Text("322222222222223"))));
 
-        // Different Edges
-        // Starting Edge 2,3
-        assertFunction(
-                "transform(bing_tiles_around(-85.05112878, 0, 2), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("21", "23", "30", "32", "31", "33"));
-        assertFunction(
-                "transform(bing_tiles_around(85.05112878, 0, 2), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("01", "03", "10", "12", "11", "13"));
-        assertFunction(
-                "transform(bing_tiles_around(0, 180, 2), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("12", "30", "32", "13", "31", "33"));
-        assertFunction(
-                "transform(bing_tiles_around(0, -180, 2), x -> bing_tile_quadkey(x))",
-                new ArrayType(VARCHAR),
-                ImmutableList.of("02", "20", "22", "03", "21", "23"));
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(-85.05112878), new DoubleWritable(0), new IntWritable(2)),
+                     new ArrayList<Text>(Arrays.asList(new Text("21"), new Text("23"), new Text("30"),
+                                                       new Text("32"), new Text("31"), new Text("33"))));
+        
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(85.05112878), new DoubleWritable(0), new IntWritable(2)),
+                     new ArrayList<Text>(Arrays.asList(new Text("01"), new Text("03"), new Text("10"),
+                                                       new Text("12"), new Text("11"), new Text("13"))));
+        
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(0), new DoubleWritable(180), new IntWritable(2)),
+                     new ArrayList<Text>(Arrays.asList(new Text("12"), new Text("30"), new Text("32"),
+                                                       new Text("13"), new Text("31"), new Text("33"))));
+        
+        assertEquals((new BT_TilesAround()).evaluate(new DoubleWritable(0), new DoubleWritable(-180), new IntWritable(2)),
+                     new ArrayList<Text>(Arrays.asList(new Text("02"), new Text("20"), new Text("22"),
+                                                       new Text("03"), new Text("21"), new Text("23"))));
     }
 }
 
