@@ -40,8 +40,10 @@ public class TestTilesCoveringGeometry
     }
 
     @Test
-    public void test_main() throws BingTileException, UDFArgumentException
+    public void test_main() throws BingTileException, UDFArgumentException, IOException
     {
+        String wkt;
+
         assertGeometryToBingTiles("POINT (60 30.12)", 10, new ArrayList<String>(Arrays.asList("1230301230")));
         assertGeometryToBingTiles("POINT (60 30.12)", 15, new ArrayList<String>(Arrays.asList("123030123010121")));
         assertGeometryToBingTiles("POINT (60 30.12)", 16, new ArrayList<String>(Arrays.asList("1230301230101212")));
@@ -55,23 +57,31 @@ public class TestTilesCoveringGeometry
         assertGeometryToBingTiles("POINT EMPTY", 10, new ArrayList<String>());
         assertGeometryToBingTiles("POLYGON EMPTY", 10, new ArrayList<String>());
 
-        // String filePath = this.getClass().getClassLoader().getResource("too_large_polygon.txt").getPath();
-        // String largeWkt = Files.lines(Paths.get(filePath)).findFirst().get();
-        // assertFunction("cardinality(geometry_to_bing_tiles(ST_Envelope(ST_GeometryFromText('" + largeWkt + "')), 16))", BIGINT, 19939L);
-        // 
-        // assertFunction("cardinality(geometry_to_bing_tiles(ST_Envelope(ST_GeometryFromText('LINESTRING (0 0, 80 80)')), 5))", BIGINT, 104L);
-        // assertFunction("transform(geometry_to_bing_tiles(bing_tile_polygon(bing_tile('1230301230')), 10), x -> bing_tile_quadkey(x))", new ArrayType(VARCHAR), new ArrayList<String>(Arrays.asList("1230301230"));
-        // assertFunction("transform(geometry_to_bing_tiles(bing_tile_polygon(bing_tile('1230301230')), 11), x -> bing_tile_quadkey(x))", new ArrayType(VARCHAR), new ArrayList<String>(Arrays.asList("12303012300", "12303012302", "12303012301", "12303012303"));
-        // assertFunction("transform(geometry_to_bing_tiles(ST_Envelope(ST_GeometryFromText('LINESTRING (59.765625 29.84064389983442, 60.2 30.14512718337612)')), 10), x -> bing_tile_quadkey(x))", new ArrayType(VARCHAR), new ArrayList<String>(Arrays.asList("1230301230", "1230301231"));
-        // assertFunction("cardinality(geometry_to_bing_tiles(ST_GeometryFromText('POLYGON ((0 0, 0 20, 20 20, 0 0))'), 14))", BIGINT, 428787L);
+        String filePath = this.getClass().getClassLoader().getResource("too_large_polygon.txt").getPath();
+        String largeWkt = Files.lines(Paths.get(filePath)).findFirst().get();
+        assertEquals( (new BT_TilesCoveringGeometry()).evaluate((new ST_Envelope()).evaluate((new ST_GeomFromText()).evaluate(new Text(largeWkt))), new IntWritable(16)).size(), 19939);
         
-        // FIXME
+        wkt = "LINESTRING (0 0, 80 80)";
+        assertEquals( (new BT_TilesCoveringGeometry()).evaluate((new ST_Envelope()).evaluate((new ST_GeomFromText()).evaluate(new Text(wkt))), new IntWritable(5)).size(), 104);
+        
+        wkt = "POLYGON ((0 0, 0 20, 20 20, 0 0))";
+        assertEquals( (new BT_TilesCoveringGeometry()).evaluate((new ST_GeomFromText()).evaluate(new Text(wkt)), new IntWritable(14)).size(), 428787);
+        
+        assertEquals((new BT_TilesCoveringGeometry()).evaluate((new BT_AsGeometry()).evaluate((new BT_FromQuadKey()).evaluate(new Text("1230301230"))), new IntWritable(11)),
+                     new ArrayList<Text>(Arrays.asList(new Text("12303012300"), new Text("12303012302"),
+                                                       new Text("12303012301"), new Text("12303012303"))));
+
+        wkt = "LINESTRING (59.765625 29.84064389983442, 60.2 30.14512718337612)";
+        assertEquals((new BT_TilesCoveringGeometry()).evaluate((new ST_Envelope()).evaluate((new ST_GeomFromText()).evaluate(new Text(wkt))), new IntWritable(10)),
+                     new ArrayList<Text>(Arrays.asList(new Text("1230301230"), new Text("1230301231"))));
+        
+        // NOTE: ESRI's Hive framework does not support geometrycollection
+        // assertGeometryToBingTiles("GEOMETRYCOLLECTION EMPTY", 10, new ArrayList<String>());
         // assertGeometryToBingTiles("GEOMETRYCOLLECTION (POINT (60 30.12))", 10, new ArrayList<String>(Arrays.asList("1230301230")));
         // assertGeometryToBingTiles("GEOMETRYCOLLECTION (POINT (60 30.12))", 15, new ArrayList<String>(Arrays.asList("123030123010121")));
         // assertGeometryToBingTiles("GEOMETRYCOLLECTION (POLYGON ((10 10, -10 10, -20 -15, 10 10)))", 3, new ArrayList<String>(Arrays.asList("033", "211", "122")));
         // assertGeometryToBingTiles("GEOMETRYCOLLECTION (POINT (60 30.12), POLYGON ((10 10, -10 10, -20 -15, 10 10)))", 3, new ArrayList<String>(Arrays.asList("033", "211", "122", "123")));
         // assertGeometryToBingTiles("GEOMETRYCOLLECTION (POINT (60 30.12), LINESTRING (61 31, 61.01 31.01), POLYGON EMPTY)", 15, new ArrayList<String>(Arrays.asList("123030123010121", "123030112310200", "123030112310202", "123030112310201")));
-        // assertGeometryToBingTiles("GEOMETRYCOLLECTION EMPTY", 10, new ArrayList<String>());
     }
 
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Longitude must be between -180\\.0 and 180\\.0")
