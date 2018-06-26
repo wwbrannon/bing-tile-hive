@@ -32,7 +32,6 @@ public class TestLargeGeometryToBingTiles
             long tileCount = Long.parseLong(parts[2]);
             
             assertEquals( (new BT_TilesCoveringGeometry()).evaluate( (new ST_GeomFromText()).evaluate(new Text(wkt)), new IntWritable(zoomLevel) ).size(), tileCount);
-            // assertFunction("cardinality(geometry_to_bing_tiles(ST_GeometryFromText('" + wkt + "'), " + zoomLevel + "))", BIGINT, tileCount);
         }
     }
 }

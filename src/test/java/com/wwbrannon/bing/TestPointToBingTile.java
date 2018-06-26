@@ -26,14 +26,14 @@ public class TestPointToBingTile
                      BingTile.fromCoordinates(256, 255, 9).toQuadKey());
     }
 
-    @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Longitude must be between -180.0 and 180.0")
+    @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Longitude must be between -180\\.0 and 180\\.0")
     public void test_lon() throws BingTileException
     {
         // Longitude out of range
         BingTile bt = BingTile.fromLatLon(30.12, 600, 15);
     }
     
-    @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Latitude must be between -85.05112878 and 85.05112878")
+    @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Latitude must be between -85\\.05112878 and 85\\.05112878")
     public void test_lat() throws BingTileException
     {
         // Latitude out of range

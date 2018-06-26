@@ -53,7 +53,6 @@ public class TestBingTileAsGeometry
         bt = (new BT_AsGeometry()).evaluate((new BT_FromCoordinates()).evaluate(new IntWritable(31), new IntWritable(31), new IntWritable(5)));
         assertEquals((new ST_AsText()).evaluate((new ST_Point()).evaluate((new ST_MaxX()).evaluate(bt), (new ST_MinY()).evaluate(bt))).toString(),
                      "POINT (180 -85.05112877980659)");
-        // assertFunction("ST_AsText(apply(bing_tile_polygon(bing_tile(31, 31, 5)), g -> ST_Point(ST_XMax(g), ST_YMin(g))))", VARCHAR, "POINT (180 -85.05112877980659)");
 
         bt = (new BT_AsGeometry()).evaluate((new BT_FromCoordinates()).evaluate(new IntWritable(0), new IntWritable(0), new IntWritable(1)));
         assertEquals((new ST_AsText()).evaluate((new ST_Point()).evaluate((new ST_MaxX()).evaluate(bt), (new ST_MinY()).evaluate(bt))).toString(), "POINT (0 0)");
