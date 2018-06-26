@@ -1,6 +1,5 @@
 package com.wwbrannon.bing.exception;
 
-import java.lang.Class;
 import java.lang.reflect.Method;
 import java.util.List;
 
