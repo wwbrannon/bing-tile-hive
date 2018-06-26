@@ -4,7 +4,7 @@
   <groupId>com.wwbrannon.bing</groupId>
   <artifactId>bing-tile-hive</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   
   <name>bing-tile-hive</name>
   <url>https://github.com/wwbrannon/bing-tile-hive</url>
