@@ -3,7 +3,7 @@ package com.wwbrannon.bing;
 import java.util.Arrays;
 import java.util.ArrayList;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.hive.serde2.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 

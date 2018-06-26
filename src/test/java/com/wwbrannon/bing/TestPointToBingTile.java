@@ -2,9 +2,8 @@ package com.wwbrannon.bing;
 
 import org.testng.annotations.Test;
 
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.hive.serde2.io.DoubleWritable;
 
 import com.wwbrannon.bing.*;
 import com.wwbrannon.bing.exception.BingTileException;

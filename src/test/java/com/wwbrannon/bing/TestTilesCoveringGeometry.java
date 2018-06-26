@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.hive.serde2.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
@@ -87,7 +87,7 @@ public class TestTilesCoveringGeometry
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Longitude must be between -180\\.0 and 180\\.0")
     public void test_lon1() throws BingTileException, UDFArgumentException
     {
-        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new org.apache.hadoop.hive.serde2.io.DoubleWritable(600), new org.apache.hadoop.hive.serde2.io.DoubleWritable(30.12)), new IntWritable(10));
+        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new DoubleWritable(600), new DoubleWritable(30.12)), new IntWritable(10));
     }
     
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Longitude must be between -180\\.0 and 180\\.0")
@@ -101,7 +101,7 @@ public class TestTilesCoveringGeometry
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Latitude must be between -85\\.05112878 and 85\\.05112878")
     public void test_lat1() throws BingTileException, UDFArgumentException
     {
-        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new org.apache.hadoop.hive.serde2.io.DoubleWritable(60), new org.apache.hadoop.hive.serde2.io.DoubleWritable(300.12)), new IntWritable(10));
+        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new DoubleWritable(60), new DoubleWritable(300.12)), new IntWritable(10));
     }
     
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Latitude must be between -85\\.05112878 and 85\\.05112878")
@@ -115,13 +115,13 @@ public class TestTilesCoveringGeometry
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Zoom level must be > 0")
     public void test_zoom1() throws BingTileException, UDFArgumentException
     {
-        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new org.apache.hadoop.hive.serde2.io.DoubleWritable(60), new org.apache.hadoop.hive.serde2.io.DoubleWritable(30.12)), new IntWritable(0));
+        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new DoubleWritable(60), new DoubleWritable(30.12)), new IntWritable(0));
     }
     
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="Zoom level must be <= 23")
     public void test_zoom2() throws BingTileException, UDFArgumentException
     {
-        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new org.apache.hadoop.hive.serde2.io.DoubleWritable(60), new org.apache.hadoop.hive.serde2.io.DoubleWritable(30.12)), new IntWritable(40));
+        ArrayList<Text> tiles = (new BT_TilesCoveringGeometry()).evaluate((new ST_Point()).evaluate(new DoubleWritable(60), new DoubleWritable(30.12)), new IntWritable(40));
     }
     
     @Test(expectedExceptions = BingTileException.class, expectedExceptionsMessageRegExp="The number of input tiles is too large \\(more than 1M\\) to compute a set of covering Bing tiles\\.")

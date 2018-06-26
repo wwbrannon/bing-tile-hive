@@ -1,14 +1,15 @@
 package com.wwbrannon.bing;
 
+import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.testng.annotations.Test;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.IntWritable;
+
 import com.esri.hadoop.hive.ST_GeomFromText;
 
 import com.wwbrannon.bing.*;

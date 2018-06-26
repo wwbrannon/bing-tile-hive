@@ -1,11 +1,11 @@
 package com.wwbrannon.bing;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 
 import org.testng.annotations.Test;
+
+import org.apache.hadoop.io.Text;
 
 import com.esri.hadoop.hive.ST_AsText;
 import com.esri.hadoop.hive.ST_Point;

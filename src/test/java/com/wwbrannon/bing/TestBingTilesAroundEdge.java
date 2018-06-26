@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import org.testng.annotations.Test;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.hive.serde2.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
